@@ -1,6 +1,8 @@
 using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 
+[assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+
 namespace iOSDotNetTest;
 
 class ResultConsumer : IDataConsumer
