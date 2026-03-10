@@ -5,8 +5,9 @@ using ObjCRuntime;
 namespace iOSDotNetTest;
 
 /// <summary>
-/// Minimal XCTest interop using raw objc_msgSend calls.
-/// Avoids Xamarin registrar interference with framework classes.
+/// Minimal XCTest interop via ObjC runtime P/Invokes.
+/// ObjCRuntime.Messaging has equivalent objc_msgSend wrappers but is internal.
+/// objc_allocateClassPair/objc_registerClassPair/class_addMethod have no managed equivalents.
 /// </summary>
 static class XCTestBridge
 {
@@ -21,14 +22,12 @@ static class XCTestBridge
         var superclass = Class.GetHandle("XCTestCase");
         _dotNetTestCaseClass = objc_allocateClassPair(superclass, "DotNetTestCase", 0);
 
-        // Add "runMSTests" instance method
         var sel = Selector.GetHandle("runMSTests");
         class_addMethod(_dotNetTestCaseClass, sel, RunMSTestsImp, "v@:");
 
         objc_registerClassPair(_dotNetTestCaseClass);
     }
 
-    // IMP callback for -[DotNetTestCase runMSTests]
     delegate void ObjCMethodImp(IntPtr self, IntPtr selector);
     static readonly ObjCMethodImp RunMSTestsImp = RunMSTestsMethod;
 
