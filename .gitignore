@@ -460,3 +460,9 @@ playground.xcworkspace
 *.ipa
 *.dSYM.zip
 *.dSYM
+
+# Test Results
+TestResults/
+
+# MSBuild binary logs
+*.binlog

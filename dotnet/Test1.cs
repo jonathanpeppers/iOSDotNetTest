@@ -7,4 +7,16 @@ public sealed class Test1
     public void TestMethod1()
     {
     }
+
+    [TestMethod]
+    public void TestMethod2()
+    {
+        Assert.Fail("This test is expected to fail");
+    }
+
+    [TestMethod]
+    public void TestMethod3()
+    {
+        Assert.Inconclusive("This test is expected to be skipped");
+    }
 }

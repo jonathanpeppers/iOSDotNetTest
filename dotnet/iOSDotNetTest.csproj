@@ -6,6 +6,7 @@
     <EnableMSTestRunner>true</EnableMSTestRunner>
     <OutputType>Exe</OutputType>
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
+    <ApplicationId>com.companyname.iOSDotNetTest</ApplicationId>
 
     <!--
       Enable full trimming in Release mode.
@@ -33,5 +34,30 @@
   <PropertyGroup>
     <MtouchInterpreter>all</MtouchInterpreter>
   </PropertyGroup>
+
+  <!-- Simulator targets for running tests -->
+  <PropertyGroup>
+    <_AppBundlePath>bin/$(Configuration)/$(TargetFramework)/iossimulator-arm64/iOSDotNetTest.app</_AppBundlePath>
+    <_SimulatorDeviceId>$(SimulatorDeviceId)</_SimulatorDeviceId>
+  </PropertyGroup>
+
+  <Target Name="Install" DependsOnTargets="Build">
+    <Exec Command="xcrun simctl install '$(_SimulatorDeviceId)' '$(_AppBundlePath)'" />
+  </Target>
+
+  <Target Name="Run">
+    <Exec Command="xcrun simctl launch --console-pty '$(_SimulatorDeviceId)' '$(ApplicationId)'" IgnoreExitCode="true" />
+  </Target>
+
+  <Target Name="Uninstall">
+    <Exec Command="xcrun simctl uninstall '$(_SimulatorDeviceId)' '$(ApplicationId)'" />
+  </Target>
+
+  <Target Name="GetResults">
+    <Exec Command="xcrun simctl get_app_container '$(_SimulatorDeviceId)' '$(ApplicationId)' data" ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_AppDataContainer" />
+    </Exec>
+    <Exec Command="cp -r '$(_AppDataContainer)/Documents/TestResults' '$(MSBuildProjectDirectory)/TestResults'" />
+  </Target>
 
 </Project>
