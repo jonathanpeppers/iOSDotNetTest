@@ -22,4 +22,16 @@
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
+  <!--
+    Workaround: Test platform assemblies fail AOT compilation on iOS.
+    The IL linker trims types from Microsoft.TestPlatform.CoreUtilities that are still
+    referenced by custom attributes in other test platform DLLs, causing the mono AOT
+    compiler to fail with "FullAOT cannot continue if there are loader errors."
+    Use the interpreter for all assemblies until this is fixed in the SDK.
+    See: https://github.com/dotnet/android/pull/10862 for the equivalent Android fix.
+  -->
+  <PropertyGroup>
+    <MtouchInterpreter>all</MtouchInterpreter>
+  </PropertyGroup>
+
 </Project>
