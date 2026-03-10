@@ -21,6 +21,19 @@
     <PackageReference Include="MSTest" Version="4.0.1" />
   </ItemGroup>
 
+  <!-- Link XCTest.framework (developer framework, not in standard SDK) -->
+  <Target Name="_ResolveXCTestFramework" BeforeTargets="_LinkNativeExecutable">
+    <Exec Command="xcrun --sdk iphonesimulator --show-sdk-platform-path" ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_SimPlatformPath" />
+    </Exec>
+    <ItemGroup>
+      <_NativeExecutableFrameworks Include="XCTest" />
+      <_AllLinkerFlags Include="-F$(_SimPlatformPath)/Developer/Library/Frameworks" />
+      <_AllLinkerFlags Include="-rpath" />
+      <_AllLinkerFlags Include="$(_SimPlatformPath)/Developer/Library/Frameworks" />
+    </ItemGroup>
+  </Target>
+
   <ItemGroup>
     <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
