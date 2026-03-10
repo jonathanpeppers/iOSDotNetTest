@@ -7,6 +7,8 @@
     <OutputType>Exe</OutputType>
     <SupportedOSPlatformVersion>13.0</SupportedOSPlatformVersion>
     <ApplicationId>com.companyname.iOSDotNetTest</ApplicationId>
+    <!-- We provide our own entry point in Main.cs -->
+    <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
 
     <!--
       Enable full trimming in Release mode.
