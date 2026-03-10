@@ -69,20 +69,12 @@ could be replaced with:
 ```csharp
 using XCTest;
 
-// Create a test case subclass with a managed callback
-var testCase = new DotNetTestCase("runMSTests");
-testCase.RunMSTests = () =>
-{
-    MSTestRunner.RunAsync().GetAwaiter().GetResult();
-};
-
-// Build and run suite
 var suite = XCTestSuite.Create("DotNetTests");
-suite.AddTest(testCase);
+suite.AddTest(new DotNetTestCase("runMSTests"));
 suite.RunTest();
 ```
 
-Where `DotNetTestCase` could simply be:
+Where `DotNetTestCase` would be:
 
 ```csharp
 using XCTest;
@@ -90,10 +82,11 @@ using XCTest;
 [Register("DotNetTestCase")]
 class DotNetTestCase : XCTestCase
 {
-    public Action? RunMSTests { get; set; }
-
     [Export("runMSTests")]
-    public void InvokeRunMSTests() => RunMSTests?.Invoke();
+    public void RunMSTests()
+    {
+        MSTestRunner.RunAsync().GetAwaiter().GetResult();
+    }
 }
 ```
 
