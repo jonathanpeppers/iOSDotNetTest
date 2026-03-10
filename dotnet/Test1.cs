@@ -1,4 +1,4 @@
-﻿namespace dotnet;
+﻿namespace iOSDotNetTest;
 
 [TestClass]
 public sealed class Test1

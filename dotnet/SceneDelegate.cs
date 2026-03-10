@@ -1,4 +1,4 @@
-namespace dotnet;
+namespace iOSDotNetTest;
 
 [Register ("SceneDelegate")]
 public class SceneDelegate : UIResponder, IUIWindowSceneDelegate {

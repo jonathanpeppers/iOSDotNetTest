@@ -1,4 +1,4 @@
-namespace dotnet;
+namespace iOSDotNetTest;
 
 [Register ("AppDelegate")]
 public class AppDelegate : UIApplicationDelegate {
