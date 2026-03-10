@@ -26,8 +26,6 @@ class ResultConsumer : IDataConsumer
 
             Console.WriteLine($"Results: passed={Passed}, failed={Failed}, skipped={Skipped}");
             Console.WriteLine($"TRX report: {TrxReportPath}");
-            // TestApplication.RunAsync() never returns on iOS, so exit from here
-            Environment.Exit(Failed > 0 ? 1 : 0);
         }
         else if (value is TestNodeUpdateMessage { TestNode: var node })
         {

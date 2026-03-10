@@ -22,6 +22,8 @@ class AppDelegate : UIApplicationDelegate
                 var testCase = XCTestBridge.CreateTestCase();
                 XCTestBridge.AddTest(suite, testCase);
                 XCTestBridge.RunTest(suite);
+                // UIApplication.Main() keeps the process alive, so exit explicitly
+                Environment.Exit(XCTestBridge.ExitCode);
             }
             catch (Exception ex)
             {

@@ -34,8 +34,15 @@ static class XCTestBridge
     static void RunMSTestsMethod(IntPtr self, IntPtr selector)
     {
         Console.WriteLine("XCTestCase: Starting MSTest execution...");
-        MSTestRunner.RunAsync().GetAwaiter().GetResult();
+        var task = MSTestRunner.RunAsync();
+        // Pump the run loop while MSTest runs on the thread pool.
+        // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html#//apple_ref/doc/uid/10000057i-CH16-SW23
+        while (!task.IsCompleted)
+            NSRunLoop.Current.RunUntil(NSRunLoopMode.Default, NSDate.FromTimeIntervalSinceNow(0.1));
+        ExitCode = task.GetAwaiter().GetResult();
     }
+
+    public static int ExitCode { get; private set; }
 
     public static IntPtr CreateTestSuite(string name)
     {
