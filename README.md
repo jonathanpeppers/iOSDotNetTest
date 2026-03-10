@@ -34,6 +34,11 @@ Tests run inside Apple's [XCTest](https://developer.apple.com/documentation/xcte
 framework via `UIApplication.Main()` + `XCTestSuite`/`XCTestCase`. This gives the
 app a proper UIKit run loop, preventing OS watchdog kills during long test runs.
 
+A single `XCTestCase` wraps the entire MSTest execution — individual test results
+are reported by MSTest itself (pass/fail/skip per test in the console and TRX).
+The XCTest layer's job is to provide the UIKit run loop and signal to iOS that the
+app is running tests, not to map each MSTest to its own `XCTestCase`.
+
 ### Current: P/Invoke-based XCTest interop
 
 `Microsoft.iOS` does not ship bindings for XCTest, so we use raw ObjC runtime
