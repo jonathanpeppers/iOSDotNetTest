@@ -39,6 +39,48 @@ are reported by MSTest itself (pass/fail/skip per test in the console and TRX).
 The XCTest layer's job is to provide the UIKit run loop and signal to iOS that the
 app is running tests, not to map each MSTest to its own `XCTestCase`.
 
+### How Apple tests normally work
+
+In an Xcode project, tests are a **separate target** that produces a `.xctest`
+bundle (a dynamic library), not an executable. The Swift project in this repo
+shows this — it has 3 targets:
+
+| Target | Product Type | Output |
+|--------|-------------|--------|
+| `iOSDotNetTest` | `com.apple.product-type.application` | `.app` |
+| `iOSDotNetTestTests` | `com.apple.product-type.bundle.unit-test` | `.xctest` |
+| `iOSDotNetTestUITests` | `com.apple.product-type.bundle.ui-testing` | `.xctest` |
+
+The normal flow is:
+
+1. `xcodebuild test` builds the app and test bundle
+2. Launches the app on the simulator
+3. Injects the `.xctest` bundle into the running app
+4. XCTest discovers all `XCTestCase` subclasses automatically
+5. Runs them and reports results via `XCTestObservation`
+
+We can't use this flow because `xcodebuild test` is a Mac-side tool that expects
+an Xcode project — we don't have one. Instead, we drive XCTest manually from
+inside the app.
+
+### What the iOS workload would need for native `.xctest` support
+
+For `dotnet test` to produce proper `.xctest` bundles and run via `xcodebuild test`,
+the iOS workload (`dotnet/macios`) would need:
+
+1. **Build as a dynamic library** — today the workload always produces a native
+   executable. A `.xctest` bundle contains a dylib that XCTest loads at runtime.
+2. **A host app** — `.xctest` bundles don't run standalone. The workload would
+   need to produce a minimal host `.app` alongside the test bundle.
+3. **XCTest entry point generation** — the dylib needs to export `XCTestCase`
+   subclasses that XCTest discovers via the ObjC runtime. The workload would
+   need to generate these from MSTest test methods.
+4. **Xcode project/scheme generation** — `xcodebuild test` needs a scheme
+   pointing to the host app + test bundle.
+5. **New `OutputType`** — something like `<OutputType>XCTestBundle</OutputType>`
+   that changes native linking from executable to dylib, generates the right
+   `Info.plist`, and structures the output as `.xctest`.
+
 ### Current: P/Invoke-based XCTest interop
 
 `Microsoft.iOS` does not ship bindings for XCTest, so we use raw ObjC runtime
