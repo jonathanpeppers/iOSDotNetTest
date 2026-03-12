@@ -2,6 +2,8 @@ using Microsoft.Testing.Platform.Extensions;
 using Microsoft.Testing.Platform.Extensions.Messages;
 
 [assembly: Parallelize(Scope = ExecutionScope.MethodLevel)]
+// Uncomment to run tests sequentially and see the UILabel update live:
+// [assembly: DoNotParallelize]
 
 namespace iOSDotNetTest;
 
