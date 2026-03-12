@@ -69,8 +69,7 @@ class SceneDelegate : UIResponder, IUIWindowSceneDelegate
 
                 var builder = await TestApplication.CreateBuilderAsync([
                     "--results-directory", resultsPath,
-                    "--report-trx",
-                    "--no-progress"
+                    "--report-trx"
                 ]);
                 builder.AddMSTest(() => [typeof(Test1).Assembly]);
                 builder.AddTrxReportProvider();

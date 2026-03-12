@@ -70,5 +70,4 @@ path for now because:
   for all assemblies. MSTest platform DLLs have IL linker/AOT failures on iOS.
 - **`GenerateTestingPlatformEntryPoint=false`**: MSTest SDK generates a `Main()`
   method that conflicts with our top-level statements entry point.
-- **`--no-progress`**: MSTest's `TerminalTestReporter` calls `Console.BufferWidth`
-  which throws `PlatformNotSupportedException` on iOS.
+
