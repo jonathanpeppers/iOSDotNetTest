@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Foundation;
 using Microsoft.Testing.Extensions;
 using Microsoft.Testing.Platform.Builder;
@@ -12,8 +13,53 @@ UIApplication.Main(args, null, typeof(AppDelegate));
 [Register("AppDelegate")]
 class AppDelegate : UIApplicationDelegate
 {
-    public override bool FinishedLaunching(UIApplication application, NSDictionary? launchOptions)
+    public override UISceneConfiguration GetConfiguration(UIApplication application,
+        UISceneSession connectingSceneSession, UISceneConnectionOptions options)
     {
+        return new UISceneConfiguration("Default Configuration", connectingSceneSession.Role);
+    }
+}
+
+[Register("SceneDelegate")]
+class SceneDelegate : UIResponder, IUIWindowSceneDelegate
+{
+    [Export("window")]
+    public UIWindow? Window { get; set; }
+
+    [Export("scene:willConnectToSession:options:")]
+    public void WillConnect(UIScene scene, UISceneSession session, UISceneConnectionOptions connectionOptions)
+    {
+        if (scene is not UIWindowScene windowScene)
+            return;
+
+        Window = new UIWindow(windowScene);
+        var vc = new UIViewController();
+        var view = vc.View;
+        Debug.Assert(view != null, "UIViewController.View should not be null");
+        view.BackgroundColor = UIColor.SystemBackground;
+
+        var label = new UILabel
+        {
+            Text = "Running tests...\n",
+            TextAlignment = UITextAlignment.Left,
+            Lines = 0,
+            Font = UIFont.GetMonospacedSystemFont(12, UIFontWeight.Regular),
+            TextColor = UIColor.Label,
+            TranslatesAutoresizingMaskIntoConstraints = false,
+        };
+        view.AddSubview(label);
+        var guide = view.SafeAreaLayoutGuide;
+        label.TopAnchor.ConstraintEqualTo(guide.TopAnchor, 8).Active = true;
+        label.LeadingAnchor.ConstraintEqualTo(guide.LeadingAnchor, 8).Active = true;
+        label.TrailingAnchor.ConstraintLessThanOrEqualTo(guide.TrailingAnchor, -8).Active = true;
+
+        Window.RootViewController = vc;
+        Window.MakeKeyAndVisible();
+
+        var consumer = new ResultConsumer();
+        consumer.StatusChanged += line =>
+            vc.InvokeOnMainThread(() => label.Text += line + "\n");
+
         Task.Run(async () =>
         {
             try
@@ -21,7 +67,6 @@ class AppDelegate : UIApplicationDelegate
                 var documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 var resultsPath = Path.Combine(documentsPath, "TestResults");
 
-                var consumer = new ResultConsumer();
                 var builder = await TestApplication.CreateBuilderAsync([
                     "--results-directory", resultsPath,
                     "--report-trx",
@@ -42,6 +87,5 @@ class AppDelegate : UIApplicationDelegate
                 Environment.Exit(1);
             }
         });
-        return true;
     }
 }

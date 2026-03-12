@@ -9,6 +9,7 @@ class ResultConsumer : IDataConsumer
 {
     public int Passed, Failed, Skipped;
     public string? TrxReportPath;
+    public event Action<string>? StatusChanged;
 
     public string Uid => nameof(ResultConsumer);
     public string DisplayName => nameof(ResultConsumer);
@@ -26,6 +27,7 @@ class ResultConsumer : IDataConsumer
 
             Console.WriteLine($"Results: passed={Passed}, failed={Failed}, skipped={Skipped}");
             Console.WriteLine($"TRX report: {TrxReportPath}");
+            StatusChanged?.Invoke($"\n✅ {Passed} passed  ❌ {Failed} failed  ⏭️ {Skipped} skipped");
         }
         else if (value is TestNodeUpdateMessage { TestNode: var node })
         {
@@ -46,6 +48,9 @@ class ResultConsumer : IDataConsumer
             var id = node.Properties.SingleOrDefault<TestMethodIdentifierProperty>();
             var testName = id is not null ? $"{id.Namespace}.{id.TypeName}.{id.MethodName}" : node.DisplayName;
             Console.WriteLine($"[{outcome.ToUpperInvariant()}] {testName}");
+
+            var icon = outcome switch { "passed" => "✅", "failed" => "❌", _ => "⏭️" };
+            StatusChanged?.Invoke($"{icon} {testName}");
         }
         return Task.CompletedTask;
     }
