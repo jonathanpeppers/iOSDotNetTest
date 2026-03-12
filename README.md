@@ -41,6 +41,29 @@ calls `Environment.Exit()` once the TRX report is written, signaling completion.
 workload's built-in mlaunch integration. The `GetResults` MSBuild target uses
 `xcrun simctl` to locate the app's data container and copy TRX files locally.
 
+### Why not XCTest?
+
+Apple's native test infrastructure uses `.xctest` bundles — dynamic libraries
+that `xcodebuild test` injects into a host app at runtime. We explored this
+approach on the [`XCTestFramework`](https://github.com/jonathanpeppers/iOSDotNetTest/tree/XCTestFramework)
+branch, but running tests from `AppDelegate.FinishedLaunching()` is the better
+path for now because:
+
+1. **New project type** — the iOS workload would need to produce `.xctest` bundles
+   (dylibs) instead of app executables, requiring a new `OutputType` and changes
+   to the native linking pipeline in `dotnet/macios`.
+2. **Developer framework support** — `Microsoft.iOS` doesn't ship bindings for
+   XCTest. It's a "developer only" framework not included in standard SDK search
+   paths, requiring custom linker flags (`-F`, `-rpath`) and either new bindings
+   or raw P/Invokes.
+3. **Two-project requirement** — in Xcode, tests require both a host `.app` and a
+   `.xctest` bundle as separate targets. This doesn't map to other .NET platforms
+   (Android, Windows) where a single test project is sufficient.
+4. **Unclear benefit** — for running MSTest on a simulator, the main gain from
+   native `.xctest` support would be the ability to run tests inside app
+   extensions, bundles, or plugins. For the common case, the current approach
+   works just as well.
+
 ### Workarounds
 
 - **`MtouchInterpreter=all`**: Disables AOT compilation and uses the interpreter
