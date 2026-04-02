@@ -9,7 +9,10 @@ namespace iOSDotNetTest;
 
 class ResultConsumer : IDataConsumer
 {
-    public int Passed, Failed, Skipped;
+    int _passed, _failed, _skipped;
+    public int Passed => _passed;
+    public int Failed => _failed;
+    public int Skipped => _skipped;
     public string? TrxReportPath;
     public event Action<string>? StatusChanged;
 
@@ -45,7 +48,7 @@ class ResultConsumer : IDataConsumer
             if (outcome is null)
                 return Task.CompletedTask;
 
-            _ = outcome switch { "passed" => Passed++, "failed" => Failed++, _ => Skipped++ };
+            _ = outcome switch { "passed" => Interlocked.Increment(ref _passed), "failed" => Interlocked.Increment(ref _failed), _ => Interlocked.Increment(ref _skipped) };
 
             var id = node.Properties.SingleOrDefault<TestMethodIdentifierProperty>();
             var testName = id is not null ? $"{id.Namespace}.{id.TypeName}.{id.MethodName}" : node.DisplayName;
